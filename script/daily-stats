@@ -3,9 +3,17 @@
 
 require_relative '../lib/init'
 
+# Left for reference.
+# require 'ruby-prof'
+# RubyProf.start
+
 loader = DataLoader.new
 vic1_rrp = loader.load_series
 stats = DailyStats.new(vic1_rrp)
+
+# result = RubyProf.stop
+# printer = RubyProf::CallStackPrinter.new(result)
+# printer.print(File.open('result.html', 'w'), :min_percent => 2)
 
 output = CSV.new(STDOUT)
 
@@ -13,8 +21,24 @@ def format_midnight(midnight)
   midnight.strftime("%Y-%m-%d")
 end
 
-output << %w(date min_rrp max_rrp average_rrp)
+output << %w(period date min_rrp max_rrp average_rrp)
 
-stats.each do |midnight, min, max, average|
-  output << [format_midnight(midnight), min, max, average]
+total = PeriodStats.new(vic1_rrp)
+output << ['total', format_midnight(total.start)] + total.min_max_avg
+
+vic1_rrp.years.each do |year|
+  year_data = PeriodStats.new(vic1_rrp, year)
+  output << ['year', format_midnight(year_data.start)] + year_data.min_max_avg
+  vic1_rrp.months_for_year(year).each do |month|
+    month_data = PeriodStats.new(vic1_rrp, year, month)
+    output << ['month', format_midnight(month_data.start)] + month_data.min_max_avg
+    vic1_rrp.days_for_month(year, month).each do |day|
+      day_data = PeriodStats.new(vic1_rrp, year, month, day)
+      output << ['day', format_midnight(day_data.start)] + day_data.min_max_avg
+    end
+  end
 end
+
+# stats.each do |midnight, min, max, average|
+#   output << [format_midnight(midnight), min, max, average]
+# end

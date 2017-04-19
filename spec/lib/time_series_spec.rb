@@ -129,4 +129,26 @@ describe TimeSeries do
     end
   end
 
+  describe "with data in 2014" do
+    before do
+      subject[Time.new(2014, 1, 1, 11, 30).utc] = double
+      subject[Time.new(2014, 12, 31, 23, 59, 59).utc] = double
+    end
+
+    it "returns just 2014" do
+      expect(subject.years).to eq [2014]
+    end
+  end
+
+  describe "with data relevant to 2014" do
+    before do
+      subject[Time.utc(2014, 1, 1, 0, 30)] = double
+      subject[Time.utc(2015, 1, 1)] = double
+    end
+
+    it "returns just 2014" do
+      expect(subject.years).to eq [2014]
+    end
+  end
+
 end

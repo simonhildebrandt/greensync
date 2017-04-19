@@ -3,3 +3,4 @@
 require_relative 'time_series'
 require_relative 'data_loader'
 require_relative 'daily_stats'
+require_relative 'period_stats'
